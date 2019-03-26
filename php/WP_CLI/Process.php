@@ -59,7 +59,7 @@ class Process {
 		return $proc;
 	}
 
-	private function __construct() {}
+	
 
 	/**
 	 * Run the command.

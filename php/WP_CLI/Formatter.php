@@ -122,55 +122,7 @@ class Formatter {
 	 * @param array      $items
 	 * @param bool|array $ascii_pre_colorized Optional. A boolean or an array of booleans to pass to `show_table()` if items in the table are pre-colorized. Default false.
 	 */
-	private function format( $items, $ascii_pre_colorized = false ) {
-		$fields = $this->args['fields'];
-
-		switch ( $this->args['format'] ) {
-			case 'count':
-				if ( ! is_array( $items ) ) {
-					$items = iterator_to_array( $items );
-				}
-				echo count( $items );
-				break;
-
-			case 'ids':
-				if ( ! is_array( $items ) ) {
-					$items = iterator_to_array( $items );
-				}
-				echo implode( ' ', $items );
-				break;
-
-			case 'table':
-				self::show_table( $items, $fields, $ascii_pre_colorized );
-				break;
-
-			case 'csv':
-				\WP_CLI\Utils\write_csv( STDOUT, $items, $fields );
-				break;
-
-			case 'json':
-			case 'yaml':
-				$out = array();
-				foreach ( $items as $item ) {
-					$out[] = \WP_CLI\Utils\pick_fields( $item, $fields );
-				}
-
-				if ( 'json' === $this->args['format'] ) {
-					if ( defined( 'JSON_PARTIAL_OUTPUT_ON_ERROR' ) ) {
-						// @codingStandardsIgnoreLine
-						echo json_encode( $out, JSON_PARTIAL_OUTPUT_ON_ERROR );
-					} else {
-						echo json_encode( $out );
-					}
-				} elseif ( 'yaml' === $this->args['format'] ) {
-					echo Spyc::YAMLDump( $out, 2, 0 );
-				}
-				break;
-
-			default:
-				\WP_CLI::error( 'Invalid format: ' . $this->args['format'] );
-		}
-	}
+	
 
 	/**
 	 * Show a single field from a list of items.
@@ -178,33 +130,7 @@ class Formatter {
 	 * @param array Array of objects to show fields from
 	 * @param string The field to show
 	 */
-	private function show_single_field( $items, $field ) {
-		$key    = null;
-		$values = array();
-
-		foreach ( $items as $item ) {
-			$item = (object) $item;
-
-			if ( null === $key ) {
-				$key = $this->find_item_key( $item, $field );
-			}
-
-			if ( 'json' === $this->args['format'] ) {
-				$values[] = $item->$key;
-			} else {
-				\WP_CLI::print_value(
-					$item->$key,
-					array(
-						'format' => $this->args['format'],
-					)
-				);
-			}
-		}
-
-		if ( 'json' === $this->args['format'] ) {
-			echo json_encode( $values );
-		}
-	}
+	
 
 	/**
 	 * Find an object's key.
@@ -214,20 +140,7 @@ class Formatter {
 	 * @param string $field
 	 * @return string $key
 	 */
-	private function find_item_key( $item, $field ) {
-		foreach ( array( $field, $this->prefix . '_' . $field ) as $maybe_key ) {
-			if ( ( is_object( $item ) && ( property_exists( $item, $maybe_key ) || isset( $item->$maybe_key ) ) ) || ( is_array( $item ) && array_key_exists( $maybe_key, $item ) ) ) {
-				$key = $maybe_key;
-				break;
-			}
-		}
-
-		if ( ! isset( $key ) ) {
-			\WP_CLI::error( "Invalid field: $field." );
-		}
-
-		return $key;
-	}
+	
 
 	/**
 	 * Show multiple fields of an object.
@@ -236,53 +149,7 @@ class Formatter {
 	 * @param string       $format              Format to display the data in
 	 * @param bool|array   $ascii_pre_colorized Optional. A boolean or an array of booleans to pass to `show_table()` if the item in the table is pre-colorized. Default false.
 	 */
-	private function show_multiple_fields( $data, $format, $ascii_pre_colorized = false ) {
-
-		$true_fields = array();
-		foreach ( $this->args['fields'] as $field ) {
-			$true_fields[] = $this->find_item_key( $data, $field );
-		}
-
-		foreach ( $data as $key => $value ) {
-			if ( ! in_array( $key, $true_fields ) ) {
-				if ( is_array( $data ) ) {
-					unset( $data[ $key ] );
-				} elseif ( is_object( $data ) ) {
-					unset( $data->$key );
-				}
-			}
-		}
-
-		switch ( $format ) {
-
-			case 'table':
-			case 'csv':
-				$rows   = $this->assoc_array_to_rows( $data );
-				$fields = array( 'Field', 'Value' );
-				if ( 'table' === $format ) {
-					self::show_table( $rows, $fields, $ascii_pre_colorized );
-				} elseif ( 'csv' === $format ) {
-					\WP_CLI\Utils\write_csv( STDOUT, $rows, $fields );
-				}
-				break;
-
-			case 'yaml':
-			case 'json':
-				\WP_CLI::print_value(
-					$data,
-					array(
-						'format' => $format,
-					)
-				);
-				break;
-
-			default:
-				\WP_CLI::error( 'Invalid format: ' . $format );
-				break;
-
-		}
-
-	}
+	
 
 	/**
 	 * Show items in a \cli\Table.
@@ -321,23 +188,7 @@ class Formatter {
 	 * @param array     $fields    Fields and values to format
 	 * @return array    $rows
 	 */
-	private function assoc_array_to_rows( $fields ) {
-		$rows = array();
-
-		foreach ( $fields as $field => $value ) {
-
-			if ( ! is_string( $value ) ) {
-				$value = json_encode( $value );
-			}
-
-			$rows[] = (object) array(
-				'Field' => $field,
-				'Value' => $value,
-			);
-		}
-
-		return $rows;
-	}
+	
 
 	/**
 	 * Transforms objects and arrays to JSON as necessary

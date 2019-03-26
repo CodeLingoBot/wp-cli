@@ -31,23 +31,7 @@ use \WP_CLI\Utils;
  */
 class CLI_Command extends WP_CLI_Command {
 
-	private function command_to_array( $command ) {
-		$dump = array(
-			'name'        => $command->get_name(),
-			'description' => $command->get_shortdesc(),
-			'longdesc'    => $command->get_longdesc(),
-		);
-
-		foreach ( $command->get_subcommands() as $subcommand ) {
-			$dump['subcommands'][] = $this->command_to_array( $subcommand );
-		}
-
-		if ( empty( $dump['subcommands'] ) ) {
-			$dump['synopsis'] = (string) $command->get_synopsis();
-		}
-
-		return $dump;
-	}
+	
 
 	/**
 	 * Print WP-CLI version.
@@ -371,93 +355,7 @@ class CLI_Command extends WP_CLI_Command {
 	/**
 	 * Returns update information.
 	 */
-	private function get_updates( $assoc_args ) {
-		$url = 'https://api.github.com/repos/wp-cli/wp-cli/releases?per_page=100';
-
-		$options = array(
-			'timeout' => 30,
-		);
-
-		$headers = array(
-			'Accept' => 'application/json',
-		);
-
-		$github_token = getenv( 'GITHUB_TOKEN' );
-		if ( false !== $github_token ) {
-			$headers['Authorization'] = 'token ' . $github_token;
-		}
-
-		$response = Utils\http_request( 'GET', $url, null, $headers, $options );
-
-		if ( ! $response->success || 200 !== $response->status_code ) {
-			WP_CLI::error( sprintf( 'Failed to get latest version (HTTP code %d).', $response->status_code ) );
-		}
-
-		$release_data = json_decode( $response->body );
-
-		$updates = array(
-			'major' => false,
-			'minor' => false,
-			'patch' => false,
-		);
-		foreach ( $release_data as $release ) {
-
-			// Get rid of leading "v" if there is one set.
-			$release_version = $release->tag_name;
-			if ( 'v' === substr( $release_version, 0, 1 ) ) {
-				$release_version = ltrim( $release_version, 'v' );
-			}
-
-			$update_type = Utils\get_named_sem_ver( $release_version, WP_CLI_VERSION );
-			if ( ! $update_type ) {
-				continue;
-			}
-
-			if ( ! isset( $release->assets[0]->browser_download_url ) ) {
-				continue;
-			}
-
-			if ( ! empty( $updates[ $update_type ] ) && ! Comparator::greaterThan( $release_version, $updates[ $update_type ]['version'] ) ) {
-				continue;
-			}
-
-			$updates[ $update_type ] = array(
-				'version'     => $release_version,
-				'update_type' => $update_type,
-				'package_url' => $release->assets[0]->browser_download_url,
-			);
-		}
-
-		foreach ( $updates as $type => $value ) {
-			if ( empty( $value ) ) {
-				unset( $updates[ $type ] );
-			}
-		}
-
-		foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
-			if ( true === \WP_CLI\Utils\get_flag_value( $assoc_args, $type ) ) {
-				return ! empty( $updates[ $type ] ) ? array( $updates[ $type ] ) : false;
-			}
-		}
-
-		if ( empty( $updates ) && preg_match( '#-alpha-(.+)$#', WP_CLI_VERSION, $matches ) ) {
-			$version_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/NIGHTLY_VERSION';
-			$response    = Utils\http_request( 'GET', $version_url );
-			if ( ! $response->success || 200 !== $response->status_code ) {
-				WP_CLI::error( sprintf( 'Failed to get current nightly version (HTTP code %d)', $response->status_code ) );
-			}
-			$nightly_version = trim( $response->body );
-			if ( WP_CLI_VERSION !== $nightly_version ) {
-				$updates['nightly'] = array(
-					'version'     => $nightly_version,
-					'update_type' => 'nightly',
-					'package_url' => 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar',
-				);
-			}
-		}
-
-		return array_values( $updates );
-	}
+	
 
 	/**
 	 * Dump the list of global parameters, as JSON or in var_export format.
@@ -600,16 +498,7 @@ class CLI_Command extends WP_CLI_Command {
 	/**
 	 * Get a string representing the type of update being checked for.
 	 */
-	private function get_update_type_str( $assoc_args ) {
-		$update_type = ' ';
-		foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
-			if ( true === \WP_CLI\Utils\get_flag_value( $assoc_args, $type ) ) {
-				$update_type = ' ' . $type . ' ';
-				break;
-			}
-		}
-		return $update_type;
-	}
+	
 
 	/**
 	 * Detects if a command exists

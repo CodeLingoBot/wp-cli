@@ -256,37 +256,7 @@ class Extractor_Test extends PHPUnit_Framework_TestCase {
 		$this->assertTrue( empty( self::$logger->stderr ) );
 	}
 
-	private function create_test_directory_structure() {
-		$temp_dir = Utils\get_temp_dir() . uniqid( self::$copy_overwrite_files_prefix, true );
-		mkdir( $temp_dir );
+	
 
-		$src_dir = $temp_dir . '/src';
-		mkdir( $src_dir );
-
-		$wp_dir = $src_dir . '/wordpress';
-		mkdir( $wp_dir );
-
-		foreach ( self::$expected_wp as $file ) {
-			if ( 0 === substr_compare( $file, '/', -1 ) ) {
-				mkdir( $wp_dir . '/' . $file );
-			} else {
-				touch( $wp_dir . '/' . $file );
-			}
-		}
-
-		return array( $temp_dir, $src_dir, $wp_dir );
-	}
-
-	private function recursive_scandir( $dir, $prefix_dir = '' ) {
-		$ret = array();
-		foreach ( array_diff( scandir( $dir ), array( '.', '..' ) ) as $file ) {
-			if ( is_dir( $dir . '/' . $file ) ) {
-				$ret[] = ( $prefix_dir ? ( $prefix_dir . '/' . $file ) : $file ) . '/';
-				$ret   = array_merge( $ret, self::recursive_scandir( $dir . '/' . $file, $prefix_dir ? ( $prefix_dir . '/' . $file ) : $file ) );
-			} else {
-				$ret[] = $prefix_dir ? ( $prefix_dir . '/' . $file ) : $file;
-			}
-		}
-		return $ret;
-	}
+	
 }

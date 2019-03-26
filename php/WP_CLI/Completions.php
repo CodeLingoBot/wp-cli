@@ -98,66 +98,11 @@ class Completions {
 
 	}
 
-	private function get_command( $words ) {
-		$positional_args = array();
-		$assoc_args      = array();
+	
 
-		foreach ( $words as $arg ) {
-			if ( preg_match( '|^--([^=]+)=?|', $arg, $matches ) ) {
-				$assoc_args[ $matches[1] ] = true;
-			} else {
-				$positional_args[] = $arg;
-			}
-		}
+	
 
-		$r = \WP_CLI::get_runner()->find_command_to_run( $positional_args );
-		if ( ! is_array( $r ) && array_pop( $positional_args ) === $this->cur_word ) {
-			$r = \WP_CLI::get_runner()->find_command_to_run( $positional_args );
-		}
-
-		if ( ! is_array( $r ) ) {
-			return $r;
-		}
-
-		list( $command, $args ) = $r;
-
-		return array( $command, $args, $assoc_args );
-	}
-
-	private function get_global_parameters() {
-		$params = array();
-		foreach ( \WP_CLI::get_configurator()->get_spec() as $key => $details ) {
-			if ( false === $details['runtime'] ) {
-				continue;
-			}
-
-			if ( isset( $details['deprecated'] ) ) {
-				continue;
-			}
-
-			if ( isset( $details['hidden'] ) ) {
-				continue;
-			}
-			$params[ $key ] = $details['runtime'];
-
-			// Add additional option like `--[no-]color`.
-			if ( true === $details['runtime'] ) {
-				$params[ 'no-' . $key ] = '';
-			}
-		}
-
-		return $params;
-	}
-
-	private function add( $opt ) {
-		if ( '' !== $this->cur_word ) {
-			if ( 0 !== strpos( $opt, $this->cur_word ) ) {
-				return;
-			}
-		}
-
-		$this->opts[] = $opt;
-	}
+	
 
 	public function render() {
 		foreach ( $this->opts as $opt ) {

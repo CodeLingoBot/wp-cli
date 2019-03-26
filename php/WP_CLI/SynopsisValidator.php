@@ -156,27 +156,6 @@ class SynopsisValidator {
 	 * @param string $operator
 	 * @return array
 	 */
-	private function query_spec( $args, $operator = 'AND' ) {
-		$operator = strtoupper( $operator );
-		$count    = count( $args );
-		$filtered = array();
-
-		foreach ( $this->spec as $key => $to_match ) {
-			$matched = 0;
-			foreach ( $args as $m_key => $m_value ) {
-				if ( array_key_exists( $m_key, $to_match ) && $m_value == $to_match[ $m_key ] ) {
-					$matched++;
-				}
-			}
-
-			if ( ( 'AND' === $operator && $matched === $count )
-				|| ( 'OR' === $operator && $matched > 0 )
-				|| ( 'NOT' === $operator && 0 === $matched ) ) {
-					$filtered[ $key ] = $to_match;
-			}
-		}
-
-		return $filtered;
-	}
+	
 
 }

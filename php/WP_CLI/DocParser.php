@@ -161,38 +161,6 @@ class DocParser {
 	 * @param string $regex Pattern to match against
 	 * @return array|null Interpreted YAML document, or null.
 	 */
-	private function get_arg_or_param_args( $regex ) {
-		$bits       = explode( "\n", $this->docComment );
-		$within_arg = false;
-		$within_doc = false;
-		$document   = array();
-		foreach ( $bits as $bit ) {
-			if ( preg_match( $regex, $bit ) ) {
-				$within_arg = true;
-			}
-
-			if ( $within_arg && $within_doc && '---' === $bit ) {
-				$within_doc = false;
-			}
-
-			if ( $within_arg && ! $within_doc && '---' === $bit ) {
-				$within_doc = true;
-			}
-
-			if ( $within_doc ) {
-				$document[] = $bit;
-			}
-
-			if ( $within_arg && '' === $bit ) {
-				$within_arg = false;
-				break;
-			}
-		}
-
-		if ( $document ) {
-			return Spyc::YAMLLoadString( implode( "\n", $document ) );
-		}
-		return null;
-	}
+	
 
 }

@@ -54,37 +54,9 @@ class Query implements \Iterator {
 	 * longer be returned by the original query, the offset must be reduced to
 	 * iterate over all remaining rows.
 	 */
-	private function adjust_offset_for_shrinking_result_set() {
-		if ( empty( $this->count_query ) ) {
-			return;
-		}
+	
 
-		$row_count = $this->db->get_var( $this->count_query );
-
-		if ( $row_count < $this->row_count ) {
-			$this->offset -= $this->row_count - $row_count;
-		}
-
-		$this->row_count = $row_count;
-	}
-
-	private function load_items_from_db() {
-		$this->adjust_offset_for_shrinking_result_set();
-
-		$query         = $this->query . sprintf( ' LIMIT %d OFFSET %d', $this->chunk_size, $this->offset );
-		$this->results = $this->db->get_results( $query );
-
-		if ( ! $this->results ) {
-			if ( $this->db->last_error ) {
-				throw new Exception( 'Database error: ' . $this->db->last_error );
-			}
-
-			return false;
-		}
-
-		$this->offset += $this->chunk_size;
-		return true;
-	}
+	
 
 	public function current() {
 		return $this->results[ $this->index_in_results ];

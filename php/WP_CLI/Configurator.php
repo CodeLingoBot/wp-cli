@@ -170,50 +170,12 @@ class Configurator {
 	 * @param array $mixed_args
 	 * @return array
 	 */
-	private function unmix_assoc_args( $mixed_args, $global_assoc = array(), $local_assoc = array() ) {
-		$assoc_args     = array();
-		$runtime_config = array();
-
-		if ( getenv( 'WP_CLI_STRICT_ARGS_MODE' ) ) {
-			foreach ( $global_assoc as $tmp ) {
-				list( $key, $value ) = $tmp;
-				if ( isset( $this->spec[ $key ] ) && false !== $this->spec[ $key ]['runtime'] ) {
-					$this->assoc_arg_to_runtime_config( $key, $value, $runtime_config );
-				}
-			}
-			foreach ( $local_assoc as $tmp ) {
-				$assoc_args[ $tmp[0] ] = $tmp[1];
-			}
-		} else {
-			foreach ( $mixed_args as $tmp ) {
-				list( $key, $value ) = $tmp;
-
-				if ( isset( $this->spec[ $key ] ) && false !== $this->spec[ $key ]['runtime'] ) {
-					$this->assoc_arg_to_runtime_config( $key, $value, $runtime_config );
-				} else {
-					$assoc_args[ $key ] = $value;
-				}
-			}
-		}
-
-		return array( $assoc_args, $runtime_config );
-	}
+	
 
 	/**
 	 * Handle turning an $assoc_arg into a runtime arg.
 	 */
-	private function assoc_arg_to_runtime_config( $key, $value, &$runtime_config ) {
-		$details = $this->spec[ $key ];
-		if ( isset( $details['deprecated'] ) ) {
-			fwrite( STDERR, "WP-CLI: The --{$key} global parameter is deprecated. {$details['deprecated']}\n" );
-		}
-
-		if ( $details['multiple'] ) {
-			$runtime_config[ $key ][] = $value;
-		} else {
-			$runtime_config[ $key ] = $value;
-		}
-	}
+	
 
 	/**
 	 * Load a YAML file of parameters into scope.

@@ -37,21 +37,12 @@ final class DefineProtectedCommands implements BootstrapStep {
 	 *
 	 * @return array
 	 */
-	private function get_protected_commands() {
-		return array(
-			'cli info',
-			'package',
-		);
-	}
+	
 
 	/**
 	 * Get the current command as a string.
 	 *
 	 * @return string Current command to be executed.
 	 */
-	private function get_current_command() {
-		$runner = new RunnerInstance();
-
-		return implode( ' ', (array) $runner()->arguments );
-	}
+	
 }
